@@ -29,7 +29,7 @@ function GameDetail() {
         const { data } = await api.get(`/api/games/${id}`);
         setGame(data);
       } catch (err) {
-        console.error("Error fetching game", err);
+        console.error("Error al obtener videojuego:", err);
         setError(err.response?.data?.message || "Videojuego no encontrado");
       }
     };
@@ -44,14 +44,13 @@ function GameDetail() {
             setLibraryStatus(data.item.status || '');
             setIsFavorite(data.item.isFavorite);
           } else {
-            // Revisar también en favoritos por si acaso
             const favRes = await api.get('/api/auth/favorites', config);
             const isFav = favRes.data.some(fav => fav._id === id);
             setIsFavorite(isFav);
             if (isFav) setInLibrary(true);
           }
-        } catch (error) {
-          console.error("Error checking library status", error);
+        } catch (err) {
+          console.error("Error al verificar estado en biblioteca:", err);
         }
       }
     };
@@ -73,8 +72,9 @@ function GameDetail() {
       } else if (!data.isFavorite && !libraryStatus) {
         setInLibrary(false);
       }
-    } catch (error) {
-      console.error("Error toggling favorite", error);
+    } catch (err) {
+      console.error("Error al alternar favorito:", err);
+      alert(err.response?.data?.message || "No se pudo actualizar el estado de favorito.");
     } finally {
       setLoadingAction(false);
     }
@@ -92,9 +92,9 @@ function GameDetail() {
       }, config);
       setInLibrary(true);
       setLibraryStatus(data.status || '');
-    } catch (error) {
-      console.error("Error al agregar a biblioteca:", error);
-      alert(error.response?.data?.message || "Error al agregar el videojuego a tu biblioteca.");
+    } catch (err) {
+      console.error("Error al agregar a biblioteca:", err);
+      alert(err.response?.data?.message || "Error al agregar el videojuego a tu biblioteca.");
     } finally {
       setLoadingAction(false);
     }
@@ -108,24 +108,25 @@ function GameDetail() {
         status: newStatus
       }, config);
       setLibraryStatus(data.status);
-    } catch (error) {
-      console.error("Error al cambiar estado:", error);
-      alert(error.response?.data?.message || "No se pudo actualizar el estado del videojuego.");
+    } catch (err) {
+      console.error("Error al cambiar estado:", err);
+      alert(err.response?.data?.message || "No se pudo actualizar el estado del videojuego.");
     } finally {
       setLoadingAction(false);
     }
   };
 
   const handleRemoveFromLibrary = async () => {
-    if (!window.confirm("¿Seguro que deseas quitar este juego de tu biblioteca personal?")) return;
+    if (!window.confirm("¿Seguro que deseas quitar este videojuego de tu biblioteca personal?")) return;
     try {
       setLoadingAction(true);
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
       await api.delete(`/api/library/${id}`, config);
       setInLibrary(false);
-    } catch (error) {
-      console.error("Error al quitar de biblioteca:", error);
-      alert(error.response?.data?.message || "No se pudo quitar el videojuego de la biblioteca.");
+      setLibraryStatus('');
+    } catch (err) {
+      console.error("Error al quitar de biblioteca:", err);
+      alert(err.response?.data?.message || "No se pudo quitar el videojuego de la biblioteca.");
     } finally {
       setLoadingAction(false);
     }
@@ -134,7 +135,7 @@ function GameDetail() {
   if (error) {
     return (
       <div className="container mx-auto p-4 max-w-xl text-center py-24 animate-fade-in">
-        <div className="text-6xl mb-4">🔍</div>
+        <div className="text-6xl mb-4">🎮</div>
         <h2 className="text-3xl font-extrabold text-white mb-2">Videojuego no encontrado</h2>
         <p className="text-gray-400 mb-8">{error}</p>
         <Link 
@@ -150,149 +151,129 @@ function GameDetail() {
   if (!game) return (
     <div className="flex justify-center items-center py-32 text-gray-400 text-xl">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
-      Cargando juego...
+      Cargando detalle del juego...
     </div>
   );
 
   return (
     <div className="container mx-auto p-4 max-w-5xl mt-6 animate-fade-in">
+      <Link to="/" className="text-blue-400 hover:text-blue-300 mb-6 inline-flex items-center gap-1.5 transition">
+        ← Volver al Catálogo
+      </Link>
+
       <div className="bg-gray-800 rounded-3xl overflow-hidden shadow-2xl border border-gray-700/60 flex flex-col md:flex-row">
-        {/* Imagen del Juego */}
-        <div className="md:w-1/2 relative bg-gray-950 flex items-center justify-center min-h-[350px]">
+        <div className="md:w-1/2 relative min-h-[350px]">
           <img 
-            src={game.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image'} 
+            src={game.imageUrl || 'https://via.placeholder.com/600x400?text=Sin+Imagen'} 
             alt={game.title} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60 md:hidden" />
+          <button 
+            onClick={toggleFavorite}
+            disabled={loadingAction}
+            aria-label="Favorito"
+            className="absolute top-4 right-4 bg-gray-900/80 hover:bg-gray-900 p-3 rounded-full text-2xl transition-transform hover:scale-110 shadow-lg"
+          >
+            {isFavorite ? '❤️' : '🤍'}
+          </button>
         </div>
 
-        {/* Detalles del Juego */}
-        <div className="p-6 md:p-8 md:w-1/2 flex flex-col justify-between">
+        <div className="p-8 md:w-1/2 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
-                {game.title}
-              </h1>
-              <button 
-                onClick={toggleFavorite}
-                disabled={loadingAction}
-                title={isFavorite ? "Quitar de Favoritos" : "Marcar como Favorito"}
-                className={`p-3 rounded-2xl transition-all shadow-md ${
-                  isFavorite 
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 scale-105' 
-                    : 'bg-gray-700/60 text-gray-400 border border-gray-600 hover:text-white hover:bg-gray-700'
-                }`}
-              >
-                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-6">
-              <span className="bg-blue-600/80 border border-blue-400/30 text-white px-3 py-1 rounded-full text-xs font-semibold tracking-wide">
-                📁 {game.genre?.name || 'Género'}
+            <div className="flex items-center gap-3 mb-3">
+              <span className="bg-blue-600/30 text-blue-300 border border-blue-500/40 px-3 py-1 rounded-full text-xs font-semibold">
+                {game.genre?.name || 'Género no especificado'}
               </span>
-              <span className="bg-purple-600/80 border border-purple-400/30 text-white px-3 py-1 rounded-full text-xs font-semibold tracking-wide">
-                🏢 {game.developer?.name || 'Desarrollador'}
-              </span>
-            </div>
-            
-            <p className="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">
-              {game.description}
-            </p>
-            
-            <div className="text-gray-400 text-xs md:text-sm mb-6 pb-6 border-b border-gray-700/60">
-              <span className="text-gray-300 font-medium">Fecha de Lanzamiento: </span> 
-              {game.releaseDate ? new Date(game.releaseDate).toLocaleDateString() : 'Desconocida'}
-            </div>
-          </div>
-
-          {/* Sección de Gestión en Biblioteca Personal */}
-          <div className="bg-gray-900/80 p-5 rounded-2xl border border-gray-700/70 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-                <span>📚</span> Mi Biblioteca Personal
-              </h3>
-              {inLibrary && (
-                libraryStatus ? (
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${STATUS_CONFIG[libraryStatus]?.badge}`}>
-                    {STATUS_CONFIG[libraryStatus]?.icon} {libraryStatus}
-                  </span>
-                ) : (
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-gray-700/80 text-gray-300 border border-gray-600">
-                    {isFavorite ? '❤️ En Favoritos' : 'Sin clasificar'}
-                  </span>
-                )
+              {inLibrary && libraryStatus && STATUS_CONFIG[libraryStatus] && (
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${STATUS_CONFIG[libraryStatus].badge}`}>
+                  <span>{STATUS_CONFIG[libraryStatus].icon}</span>
+                  <span>{libraryStatus}</span>
+                </span>
               )}
             </div>
 
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4">{game.title}</h1>
+            <p className="text-gray-300 leading-relaxed mb-6">{game.description}</p>
+
+            <div className="grid grid-cols-2 gap-4 text-sm text-gray-400 mb-6 bg-gray-900/50 p-4 rounded-xl border border-gray-700/50">
+              <div>
+                <span className="block text-gray-500 font-medium">Desarrolladora:</span>
+                <span className="text-white font-semibold">{game.developer?.name || 'Desconocido'}</span>
+              </div>
+              <div>
+                <span className="block text-gray-500 font-medium">Lanzamiento:</span>
+                <span className="text-white font-semibold">
+                  {game.releaseDate ? new Date(game.releaseDate).toLocaleDateString('es-AR') : 'Sin fecha'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-gray-700/60">
             {user ? (
               inLibrary ? (
                 <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-gray-400 block mb-1">Clasificar estado de juego (Opcional):</label>
-                    <select
-                      value={libraryStatus || ''}
-                      disabled={loadingAction}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                      className="w-full bg-gray-800 text-white text-sm rounded-xl px-3 py-2 border border-gray-700 focus:outline-none focus:border-blue-500 cursor-pointer"
-                    >
-                      <option value="">⚪ Sin clasificar (Solo en Biblioteca / Favorito)</option>
-                      {ALL_STATUSES.map(st => (
-                        <option key={st} value={st}>
-                          {STATUS_CONFIG[st].icon} {st}
-                        </option>
-                      ))}
-                    </select>
+                  <label className="block text-xs uppercase tracking-wider text-gray-400 font-bold">
+                    Estado en tu Biblioteca:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {ALL_STATUSES.map(status => {
+                      const active = libraryStatus === status;
+                      return (
+                        <button
+                          key={status}
+                          onClick={() => handleStatusChange(status)}
+                          disabled={loadingAction}
+                          className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 border ${
+                            active 
+                              ? 'bg-blue-600 border-blue-500 text-white shadow-lg' 
+                              : 'bg-gray-700/60 border-gray-600/60 text-gray-300 hover:bg-gray-700'
+                          }`}
+                        >
+                          <span>{STATUS_CONFIG[status]?.icon}</span>
+                          <span>{status}</span>
+                        </button>
+                      );
+                    })}
                   </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                    <Link
-                      to="/library"
-                      className="text-xs text-blue-400 hover:text-blue-300 underline font-medium"
-                    >
-                      Ver en Mi Biblioteca →
-                    </Link>
-                    <button
-                      onClick={handleRemoveFromLibrary}
-                      disabled={loadingAction}
-                      className="text-xs text-red-400 hover:text-red-300 font-medium hover:underline"
-                    >
-                      Quitar de la biblioteca
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleRemoveFromLibrary}
+                    disabled={loadingAction}
+                    className="text-xs text-rose-400 hover:text-rose-300 hover:underline pt-1 inline-block transition"
+                  >
+                    Quitar de mi biblioteca personal
+                  </button>
                 </div>
               ) : (
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <button
-                    onClick={() => handleAddToLibrary('')}
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => handleAddToLibrary('Pendiente')}
                     disabled={loadingAction}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-md transition-all hover:scale-[1.02]"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
                   >
-                    + Agregar a mi Biblioteca
+                    <span>📚</span>
+                    <span>Agregar a mi Biblioteca</span>
                   </button>
                 </div>
               )
             ) : (
-              <p className="text-xs text-gray-400">
-                <Link to="/login" className="text-blue-400 hover:underline font-semibold">Inicia sesión</Link> para clasificar este juego en tu biblioteca personal (Pendiente, Jugando, Completado o Abandonado).
+              <p className="text-sm text-gray-400 bg-gray-900/60 p-3 rounded-lg text-center">
+                <Link to="/login" className="text-blue-400 hover:underline font-semibold">Inicia sesión</Link> para agregarlo a tu biblioteca personal.
               </p>
             )}
-          </div>
 
-          {/* Enlace externo a Steam */}
-          {game.steamUrl && (
-            <a 
-              href={game.steamUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2"
-            >
-              <span>Ver en Steam Store ↗</span>
-            </a>
-          )}
+            {game.steamUrl && (
+              <a 
+                href={game.steamUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full bg-[#1b2838] hover:bg-[#2a475e] text-white font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2 border border-gray-700"
+              >
+                <span>🛒</span>
+                <span>Ver en la Tienda de Steam</span>
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>
