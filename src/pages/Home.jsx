@@ -5,14 +5,18 @@ import api from '../services/api';
 function Home() {
   const [games, setGames] = useState([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGames = async () => {
+      setLoading(true);
       try {
         const { data } = await api.get(`/api/games?search=${search}`);
         setGames(data);
       } catch (error) {
         console.error("Error fetching games", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchGames();
@@ -29,20 +33,25 @@ function Home() {
           <input 
             type="text"
             placeholder="Buscar por título, género o empresa..."
-            className="w-full max-w-2xl p-4 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500 transition-colors shadow-lg text-lg"
+            className="w-full max-w-2xl p-4 rounded-xl bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500 transition-colors shadow-lg text-lg"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </header>
       
-      {games.length === 0 ? (
-        <p className="text-center text-gray-500 text-xl">No se encontraron juegos.</p>
+      {loading ? (
+        <div className="flex justify-center items-center py-24 text-gray-400 text-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
+          Cargando catálogo...
+        </div>
+      ) : games.length === 0 ? (
+        <p className="text-center text-gray-500 text-xl py-12">No se encontraron videojuegos en el catálogo.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {games.map(game => (
-            <div key={game._id} className="bg-gray-800 rounded-xl overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-300 flex flex-col group">
-              <div className="relative h-48 overflow-hidden">
+            <div key={game._id} className="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-300 flex flex-col group border border-gray-700/60 hover:border-blue-500/50">
+              <div className="relative h-48 overflow-hidden bg-gray-900">
                 <img 
                   src={game.imageUrl || 'https://via.placeholder.com/300x150?text=No+Image'} 
                   alt={game.title} 
@@ -60,7 +69,7 @@ function Home() {
                 </div>
                 <Link 
                   to={`/games/${game._id}`}
-                  className="mt-auto block w-full text-center bg-gray-700 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  className="mt-auto block w-full text-center bg-gray-700 hover:bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors"
                 >
                   Ver Detalles
                 </Link>

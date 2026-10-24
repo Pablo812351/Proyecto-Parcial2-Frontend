@@ -94,7 +94,7 @@ function GameDetail() {
       setLibraryStatus(data.status || '');
     } catch (error) {
       console.error("Error al agregar a biblioteca:", error);
-      alert("Error al agregar a tu biblioteca.");
+      alert(error.response?.data?.message || "Error al agregar el videojuego a tu biblioteca.");
     } finally {
       setLoadingAction(false);
     }
@@ -110,7 +110,7 @@ function GameDetail() {
       setLibraryStatus(data.status);
     } catch (error) {
       console.error("Error al cambiar estado:", error);
-      alert("No se pudo actualizar el estado.");
+      alert(error.response?.data?.message || "No se pudo actualizar el estado del videojuego.");
     } finally {
       setLoadingAction(false);
     }
@@ -125,6 +125,7 @@ function GameDetail() {
       setInLibrary(false);
     } catch (error) {
       console.error("Error al quitar de biblioteca:", error);
+      alert(error.response?.data?.message || "No se pudo quitar el videojuego de la biblioteca.");
     } finally {
       setLoadingAction(false);
     }

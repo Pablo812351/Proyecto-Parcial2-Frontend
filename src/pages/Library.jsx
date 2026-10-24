@@ -73,7 +73,7 @@ function Library() {
       setItems(prev => prev.map(item => item.game._id === gameId ? data : item));
     } catch (error) {
       console.error('Error al actualizar estado:', error);
-      alert('No se pudo actualizar el estado.');
+      alert(error.response?.data?.message || 'No se pudo actualizar el estado del videojuego.');
     } finally {
       setActionLoading(null);
     }
@@ -112,7 +112,7 @@ function Library() {
       setItems(prev => prev.filter(item => item.game._id !== gameId));
     } catch (error) {
       console.error('Error al eliminar de biblioteca:', error);
-      alert('Error al quitar el juego.');
+      alert(error.response?.data?.message || 'Error al quitar el videojuego de la biblioteca.');
     } finally {
       setActionLoading(null);
     }
@@ -171,10 +171,11 @@ function Library() {
         </div>
 
         {/* Tarjetas de Estadísticas */}
+        {/* Tarjetas de Estadísticas y Filtros */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
           <div
             onClick={() => setActiveFilter('Todos')}
-            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all ${activeFilter === 'Todos' ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-gray-700 hover:border-gray-600'
+            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${activeFilter === 'Todos' ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-gray-700 hover:border-gray-600'
               }`}
           >
             <div className="text-xs uppercase text-gray-400 font-semibold">Total</div>
@@ -183,7 +184,7 @@ function Library() {
 
           <div
             onClick={() => setActiveFilter('Jugando')}
-            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all ${activeFilter === 'Jugando' ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-gray-700 hover:border-gray-600'
+            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${activeFilter === 'Jugando' ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-gray-700 hover:border-gray-600'
               }`}
           >
             <div className="text-xs uppercase text-emerald-400 font-semibold flex items-center gap-1">
@@ -194,7 +195,7 @@ function Library() {
 
           <div
             onClick={() => setActiveFilter('Pendiente')}
-            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all ${activeFilter === 'Pendiente' ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-gray-700 hover:border-gray-600'
+            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${activeFilter === 'Pendiente' ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-gray-700 hover:border-gray-600'
               }`}
           >
             <div className="text-xs uppercase text-amber-400 font-semibold flex items-center gap-1">
@@ -205,7 +206,7 @@ function Library() {
 
           <div
             onClick={() => setActiveFilter('Completado')}
-            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all ${activeFilter === 'Completado' ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-gray-700 hover:border-gray-600'
+            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${activeFilter === 'Completado' ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-gray-700 hover:border-gray-600'
               }`}
           >
             <div className="text-xs uppercase text-blue-400 font-semibold flex items-center gap-1">
@@ -216,7 +217,7 @@ function Library() {
 
           <div
             onClick={() => setActiveFilter('Abandonado')}
-            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all ${activeFilter === 'Abandonado' ? 'border-rose-500 ring-2 ring-rose-500/30' : 'border-gray-700 hover:border-gray-600'
+            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${activeFilter === 'Abandonado' ? 'border-rose-500 ring-2 ring-rose-500/30' : 'border-gray-700 hover:border-gray-600'
               }`}
           >
             <div className="text-xs uppercase text-rose-400 font-semibold flex items-center gap-1">
@@ -227,7 +228,7 @@ function Library() {
 
           <div
             onClick={() => setActiveFilter('Favoritos')}
-            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all ${activeFilter === 'Favoritos' ? 'border-pink-500 ring-2 ring-pink-500/30' : 'border-gray-700 hover:border-gray-600'
+            className={`p-3 rounded-xl bg-gray-800/80 border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${activeFilter === 'Favoritos' ? 'border-pink-500 ring-2 ring-pink-500/30' : 'border-gray-700 hover:border-gray-600'
               }`}
           >
             <div className="text-xs uppercase text-pink-400 font-semibold flex items-center gap-1">
@@ -237,30 +238,15 @@ function Library() {
           </div>
         </div>
 
-        {/* Pestañas y Buscador interno */}
-        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mt-8">
-          <div className="flex flex-wrap gap-2">
-            {['Todos', 'Jugando', 'Pendiente', 'Completado', 'Abandonado', 'Favoritos'].map(filter => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${activeFilter === filter
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                  }`}
-              >
-                {filter === 'Favoritos' ? '❤️ Favoritos' : filter}
-              </button>
-            ))}
-          </div>
-
-          <div className="relative md:w-72">
+        {/* Buscador interno */}
+        <div className="flex justify-end mt-6">
+          <div className="relative w-full md:w-72">
             <input
               type="text"
               placeholder="Buscar en mi biblioteca..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm shadow-md transition-colors"
             />
             {searchQuery && (
               <button

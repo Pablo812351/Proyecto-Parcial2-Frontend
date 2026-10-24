@@ -10,6 +10,9 @@ function AdminPanel() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '', description: '', steamUrl: '', imageUrl: '', genreName: '', developerName: '', releaseDate: ''
   });
@@ -24,16 +27,20 @@ function AdminPanel() {
   }, [user, navigate]);
 
   const fetchGames = async () => {
+    setLoading(true);
     try {
       const { data } = await api.get('/api/games');
       setGames(data);
     } catch (error) {
-      console.error("Error fetching games", error);
+      console.error('Error al cargar videojuegos:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCreateOrEdit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
       
@@ -46,8 +53,10 @@ function AdminPanel() {
       resetForm();
       fetchGames();
     } catch (error) {
-      console.error("Error guardando juego", error);
-      alert("Error: " + (error.response?.data?.message || error.message));
+      console.error('Error guardando videojuego:', error);
+      alert(error.response?.data?.message || 'Error al guardar el videojuego');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -72,14 +81,14 @@ function AdminPanel() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Seguro que deseas eliminar este juego?')) {
+    if (window.confirm('¿Seguro que deseas eliminar este videojuego del catálogo?')) {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
         await api.delete(`/api/games/${id}`, config);
         fetchGames();
       } catch (error) {
         console.error("Error eliminando juego", error);
-        alert("Error al eliminar el juego: " + (error.response?.data?.message || error.message));
+        alert(error.response?.data?.message || 'Error al eliminar el videojuego');
       }
     }
   };
