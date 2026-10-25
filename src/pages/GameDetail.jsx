@@ -43,12 +43,11 @@ function GameDetail() {
           if (data.inLibrary && data.item) {
             setInLibrary(true);
             setLibraryStatus(data.item.status || '');
-            setIsFavorite(data.item.isFavorite);
+            setIsFavorite(Boolean(data.item.isFavorite));
           } else {
-            const favRes = await api.get('/api/auth/favorites', config);
-            const isFav = favRes.data.some(fav => fav._id === id);
-            setIsFavorite(isFav);
-            if (isFav) setInLibrary(true);
+            setInLibrary(false);
+            setLibraryStatus('');
+            setIsFavorite(false);
           }
         } catch (err) {
           console.error("Error al verificar estado en biblioteca:", err);
@@ -125,6 +124,7 @@ function GameDetail() {
       await api.delete(`/api/library/${id}`, config);
       setInLibrary(false);
       setLibraryStatus('');
+      setIsFavorite(false);
     } catch (err) {
       console.error("Error al quitar de biblioteca:", err);
       setActionError(err.response?.data?.message || "No se pudo quitar el videojuego de la biblioteca.");
