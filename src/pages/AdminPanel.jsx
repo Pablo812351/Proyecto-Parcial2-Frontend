@@ -39,6 +39,31 @@ function AdminPanel() {
 
   const handleCreateOrEdit = async (e) => {
     e.preventDefault();
+
+    if (!formData.title.trim() || !formData.description.trim() || !formData.developerName.trim() || !formData.genreName.trim() || !formData.imageUrl.trim()) {
+      alert('Por favor complete todos los campos obligatorios.');
+      return;
+    }
+
+    // Validar duplicados de título en el cliente antes de enviar
+    const cleanTitle = formData.title.trim().toLowerCase();
+    const isDuplicate = games.some(g => 
+      g._id !== editingId && g.title.trim().toLowerCase() === cleanTitle
+    );
+    if (isDuplicate) {
+      alert('Ya existe un videojuego registrado con ese título. Por favor elija otro.');
+      return;
+    }
+
+    if (formData.releaseDate) {
+      const selectedYear = new Date(formData.releaseDate).getFullYear();
+      const maxYear = new Date().getFullYear() + 10;
+      if (isNaN(selectedYear) || selectedYear < 1950 || selectedYear > maxYear) {
+        alert(`El año de lanzamiento debe estar comprendido entre 1950 y ${maxYear}.`);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
@@ -125,6 +150,8 @@ function AdminPanel() {
               />
               <input 
                 type="date" required
+                min="1950-01-01"
+                max="2036-12-31"
                 className="p-3 w-1/3 bg-gray-700 text-white rounded-lg outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600 transition"
                 value={formData.releaseDate} onChange={e => setFormData({...formData, releaseDate: e.target.value})}
               />
