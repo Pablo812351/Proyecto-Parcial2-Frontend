@@ -12,6 +12,8 @@ function AdminPanel() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     title: '', description: '', steamUrl: '', imageUrl: '', genreName: '', developerName: '', releaseDate: ''
   });
@@ -41,7 +43,7 @@ function AdminPanel() {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.description.trim() || !formData.developerName.trim() || !formData.genreName.trim() || !formData.imageUrl.trim()) {
-      alert('Por favor complete todos los campos obligatorios.');
+      setError('Por favor complete todos los campos obligatorios.');
       return;
     }
 
@@ -51,7 +53,7 @@ function AdminPanel() {
       g._id !== editingId && g.title.trim().toLowerCase() === cleanTitle
     );
     if (isDuplicate) {
-      alert('Ya existe un videojuego registrado con ese título. Por favor elija otro.');
+      setError('Ya existe un videojuego registrado con ese título. Por favor elija otro.');
       return;
     }
 
@@ -59,8 +61,8 @@ function AdminPanel() {
       const selectedYear = new Date(formData.releaseDate).getFullYear();
       const maxYear = new Date().getFullYear() + 10;
       if (isNaN(selectedYear) || selectedYear < 1950 || selectedYear > maxYear) {
-        alert(`El año de lanzamiento debe estar comprendido entre 1950 y ${maxYear}.`);
-        return;
+        setError(`El año de lanzamiento debe estar comprendido entre 1950 y ${maxYear}.`);
+      return;
       }
     }
 
@@ -74,17 +76,20 @@ function AdminPanel() {
         await api.post('/api/games', formData, config);
       }
       
+      setSuccess(editingId ? '¡Videojuego actualizado correctamente!' : '¡Videojuego registrado correctamente!');
       resetForm();
       fetchGames();
     } catch (error) {
       console.error('Error al guardar videojuego:', error);
-      alert(error.response?.data?.message || 'Error al guardar el videojuego.');
+      setError(error.response?.data?.message || 'Error al guardar el videojuego.');
     } finally {
       setSaving(false);
     }
   };
 
   const startEdit = (game) => {
+    setError('');
+    setSuccess('');
     setEditingId(game._id);
     setFormData({
       title: game.title,
@@ -99,6 +104,8 @@ function AdminPanel() {
   };
 
   const resetForm = () => {
+    setError('');
+    setSuccess('');
     setShowForm(false);
     setEditingId(null);
     setFormData({ title: '', description: '', steamUrl: '', imageUrl: '', genreName: '', developerName: '', releaseDate: '' });
@@ -112,7 +119,7 @@ function AdminPanel() {
         fetchGames();
       } catch (error) {
         console.error("Error al eliminar videojuego:", error);
-        alert(error.response?.data?.message || 'Error al eliminar el videojuego.');
+        setError(error.response?.data?.message || 'Error al eliminar el videojuego.');
       }
     }
   };
@@ -135,6 +142,38 @@ function AdminPanel() {
           <span>{showForm ? 'Ocultar Formulario' : 'Nuevo Videojuego'}</span>
         </button>
       </header>
+
+      {error && (
+        <div className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-2xl mb-6 flex items-center justify-between shadow-lg animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">⚠️</span>
+            <span className="font-semibold text-sm">{error}</span>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setError('')} 
+            className="text-red-400 hover:text-white font-bold text-lg px-2 transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-emerald-500/20 border border-emerald-500 text-emerald-300 p-4 rounded-2xl mb-6 flex items-center justify-between shadow-lg animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">✅</span>
+            <span className="font-semibold text-sm">{success}</span>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setSuccess('')} 
+            className="text-emerald-400 hover:text-white font-bold text-lg px-2 transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {showForm && (
         <div className="mb-8 space-y-4 animate-fade-in">

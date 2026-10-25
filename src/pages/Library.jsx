@@ -40,6 +40,7 @@ function Library() {
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
+  const [error, setError] = useState('');
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -73,7 +74,7 @@ function Library() {
       setItems(prev => prev.map(item => item.game._id === gameId ? data : item));
     } catch (error) {
       console.error('Error al actualizar estado:', error);
-      alert(error.response?.data?.message || 'No se pudo actualizar el estado del videojuego.');
+      setError(error.response?.data?.message || 'No se pudo actualizar el estado del videojuego.');
     } finally {
       setActionLoading(null);
     }
@@ -97,7 +98,7 @@ function Library() {
       }
     } catch (error) {
       console.error('Error al alternar favorito:', error);
-      alert(error.response?.data?.message || 'No se pudo alternar el favorito.');
+      setError(error.response?.data?.message || 'No se pudo alternar el favorito.');
     } finally {
       setActionLoading(null);
     }
@@ -113,7 +114,7 @@ function Library() {
       setItems(prev => prev.filter(item => item.game._id !== gameId));
     } catch (error) {
       console.error('Error al eliminar de biblioteca:', error);
-      alert(error.response?.data?.message || 'Error al quitar el videojuego de la biblioteca.');
+      setError(error.response?.data?.message || 'Error al quitar el videojuego de la biblioteca.');
     } finally {
       setActionLoading(null);
     }
@@ -270,6 +271,22 @@ function Library() {
           )}
         </div>
       </header>
+
+      {error && (
+        <div className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-2xl mb-6 flex items-center justify-between shadow-lg animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">⚠️</span>
+            <span className="font-semibold text-sm">{error}</span>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setError('')} 
+            className="text-red-400 hover:text-white font-bold text-lg px-2 transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center items-center py-24 text-gray-400 text-lg">

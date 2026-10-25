@@ -20,6 +20,7 @@ function GameDetail() {
   const [inLibrary, setInLibrary] = useState(false);
   const [libraryStatus, setLibraryStatus] = useState('Pendiente');
   const [loadingAction, setLoadingAction] = useState(false);
+  const [actionError, setActionError] = useState('');
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ function GameDetail() {
   }, [id, user]);
 
   const toggleFavorite = async () => {
-    if (!user) return alert("Debes iniciar sesión para marcar favoritos.");
+    if (!user) return setActionError("Debes iniciar sesión para marcar favoritos.");
     try {
       setLoadingAction(true);
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
@@ -74,14 +75,14 @@ function GameDetail() {
       }
     } catch (err) {
       console.error("Error al alternar favorito:", err);
-      alert(err.response?.data?.message || "No se pudo actualizar el estado de favorito.");
+      setActionError(err.response?.data?.message || "No se pudo actualizar el estado de favorito.");
     } finally {
       setLoadingAction(false);
     }
   };
 
   const handleAddToLibrary = async (statusToSet = '') => {
-    if (!user) return alert("Debes iniciar sesión para gestionar tu biblioteca.");
+    if (!user) return setActionError("Debes iniciar sesión para gestionar tu biblioteca.");
     try {
       setLoadingAction(true);
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
@@ -94,7 +95,7 @@ function GameDetail() {
       setLibraryStatus(data.status || '');
     } catch (err) {
       console.error("Error al agregar a biblioteca:", err);
-      alert(err.response?.data?.message || "Error al agregar el videojuego a tu biblioteca.");
+      setActionError(err.response?.data?.message || "Error al agregar el videojuego a tu biblioteca.");
     } finally {
       setLoadingAction(false);
     }
@@ -110,7 +111,7 @@ function GameDetail() {
       setLibraryStatus(data.status);
     } catch (err) {
       console.error("Error al cambiar estado:", err);
-      alert(err.response?.data?.message || "No se pudo actualizar el estado del videojuego.");
+      setActionError(err.response?.data?.message || "No se pudo actualizar el estado del videojuego.");
     } finally {
       setLoadingAction(false);
     }
@@ -126,7 +127,7 @@ function GameDetail() {
       setLibraryStatus('');
     } catch (err) {
       console.error("Error al quitar de biblioteca:", err);
-      alert(err.response?.data?.message || "No se pudo quitar el videojuego de la biblioteca.");
+      setActionError(err.response?.data?.message || "No se pudo quitar el videojuego de la biblioteca.");
     } finally {
       setLoadingAction(false);
     }
@@ -160,6 +161,22 @@ function GameDetail() {
       <Link to="/" className="text-blue-400 hover:text-blue-300 mb-6 inline-flex items-center gap-1.5 transition">
         ← Volver al Catálogo
       </Link>
+
+      {actionError && (
+        <div className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-2xl mb-6 flex items-center justify-between shadow-lg animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">⚠️</span>
+            <span className="font-semibold text-sm">{actionError}</span>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setActionError('')} 
+            className="text-red-400 hover:text-white font-bold text-lg px-2 transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className="bg-gray-800 rounded-3xl overflow-hidden shadow-2xl border border-gray-700/60 flex flex-col md:flex-row">
         <div className="md:w-1/2 relative min-h-[350px]">
