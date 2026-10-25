@@ -31,6 +31,7 @@ export const translateErrorMessage = (msg) => {
   if (trimmed.includes('duplicate key') || trimmed.includes('E11000')) {
     if (trimmed.includes('username')) return 'El nombre de usuario ya está en uso. Por favor elija otro.';
     if (trimmed.includes('email')) return 'El correo electrónico ya está registrado. Por favor utilice otro.';
+    if (trimmed.includes('title')) return 'Ya existe un videojuego registrado con ese título. Por favor elija otro.';
     if (trimmed.includes('name')) return 'Ya existe un elemento registrado con ese nombre.';
     return 'Ya existe un registro con esos datos en el sistema.';
   }
