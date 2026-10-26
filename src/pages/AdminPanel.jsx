@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 function AdminPanel() {
   const [games, setGames] = useState([]);
@@ -14,6 +15,7 @@ function AdminPanel() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [formData, setFormData] = useState({
     title: '', description: '', steamUrl: '', imageUrl: '', genreName: '', developerName: '', releaseDate: ''
   });
@@ -111,16 +113,22 @@ function AdminPanel() {
     setFormData({ title: '', description: '', steamUrl: '', imageUrl: '', genreName: '', developerName: '', releaseDate: '' });
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Seguro que deseas eliminar este videojuego del catálogo?')) {
-      try {
-        const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await api.delete(`/api/games/${id}`, config);
-        fetchGames();
-      } catch (error) {
-        console.error("Error al eliminar videojuego:", error);
-        setError(error.response?.data?.message || 'Error al eliminar el videojuego.');
-      }
+  const handleDeleteClick = (game) => {
+    setDeleteTarget(game);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      await api.delete(`/api/games/${deleteTarget._id}`, config);
+      setSuccess(`Videojuego "${deleteTarget.title}" eliminado correctamente.`);
+      fetchGames();
+    } catch (error) {
+      console.error("Error al eliminar videojuego:", error);
+      setError(error.response?.data?.message || 'Error al eliminar el videojuego.');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -293,7 +301,7 @@ function AdminPanel() {
                       Editar
                     </button>
                     <button 
-                      onClick={() => handleDelete(game._id)}
+                      onClick={() => handleDeleteClick(game)}
                       className="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-3 rounded-lg text-sm transition"
                     >
                       Eliminar
@@ -305,6 +313,15 @@ function AdminPanel() {
           </table>
         </div>
       )}
+      <ConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        title="¿Eliminar videojuego del catálogo?"
+        message={`¿Estás seguro de que deseas eliminar permanentemente "${deleteTarget?.title}"? Esta acción no se puede deshacer.`}
+        confirmText="Sí, Eliminar"
+        cancelText="Cancelar"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 const STATUS_CONFIG = {
   'Jugando': { badge: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40', icon: '▶️' },
@@ -21,6 +22,7 @@ function GameDetail() {
   const [libraryStatus, setLibraryStatus] = useState('Pendiente');
   const [loadingAction, setLoadingAction] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [showConfirmRemove, setShowConfirmRemove] = useState(false);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -116,8 +118,12 @@ function GameDetail() {
     }
   };
 
-  const handleRemoveFromLibrary = async () => {
-    if (!window.confirm("¿Seguro que deseas quitar este videojuego de tu biblioteca personal?")) return;
+    const handleRemoveClick = () => {
+    setShowConfirmRemove(true);
+  };
+
+  const confirmRemoveFromLibrary = async () => {
+    setShowConfirmRemove(false);
     try {
       setLoadingAction(true);
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
@@ -254,7 +260,7 @@ function GameDetail() {
                     })}
                   </div>
                   <button
-                    onClick={handleRemoveFromLibrary}
+                    onClick={handleRemoveClick}
                     disabled={loadingAction}
                     className="text-xs text-rose-400 hover:text-rose-300 hover:underline pt-1 inline-block transition"
                   >
@@ -293,6 +299,15 @@ function GameDetail() {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showConfirmRemove}
+        title="¿Quitar de tu biblioteca personal?"
+        message={`¿Estás seguro de que deseas remover "${game?.title}" de tu biblioteca personal y de tus favoritos?`}
+        confirmText="Sí, Quitar"
+        cancelText="Cancelar"
+        onCancel={() => setShowConfirmRemove(false)}
+        onConfirm={confirmRemoveFromLibrary}
+      />
     </div>
   );
 }

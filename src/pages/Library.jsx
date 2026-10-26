@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 const STATUS_CONFIG = {
   'Jugando': {
@@ -41,6 +42,7 @@ function Library() {
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState('');
+  const [removeTarget, setRemoveTarget] = useState(null);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -104,19 +106,24 @@ function Library() {
     }
   };
 
-  const handleRemove = async (gameId, title) => {
-    if (!window.confirm(`¿Quitar "${title}" de tu biblioteca personal?`)) return;
+    const handleRemoveClick = (gameId, title) => {
+    setRemoveTarget({ id: gameId, title });
+  };
 
+  const confirmRemove = async () => {
+    if (!removeTarget) return;
+    const { id } = removeTarget;
     try {
-      setActionLoading(gameId);
+      setActionLoading(id);
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      await api.delete(`/api/library/${gameId}`, config);
-      setItems(prev => prev.filter(item => item.game._id !== gameId));
+      await api.delete(`/api/library/${id}`, config);
+      setItems(prev => prev.filter(item => item.game._id !== id));
     } catch (error) {
       console.error('Error al eliminar de biblioteca:', error);
       setError(error.response?.data?.message || 'Error al quitar el videojuego de la biblioteca.');
     } finally {
       setActionLoading(null);
+      setRemoveTarget(null);
     }
   };
 
@@ -371,7 +378,7 @@ function Library() {
                         Ver Detalle
                       </Link>
                       <button
-                        onClick={() => handleRemove(game._id, game.title)}
+                        onClick={() => handleRemoveClick(game._id, game.title)}
                         disabled={isLoading}
                         className="text-gray-400 hover:text-rose-400 p-1.5 text-xs transition"
                         title="Quitar de mi biblioteca"
@@ -386,6 +393,15 @@ function Library() {
           })}
         </div>
       )}
+      <ConfirmModal
+        isOpen={Boolean(removeTarget)}
+        title="¿Quitar de tu biblioteca personal?"
+        message={`¿Estás seguro de que deseas quitar "${removeTarget?.title}" de tu biblioteca personal?`}
+        confirmText="Sí, Quitar"
+        cancelText="Cancelar"
+        onCancel={() => setRemoveTarget(null)}
+        onConfirm={confirmRemove}
+      />
     </div>
   );
 }
