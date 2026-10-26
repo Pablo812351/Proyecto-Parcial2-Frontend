@@ -318,6 +318,16 @@ function GameDetail() {
                 <span>Ver en la Tienda de Steam</span>
               </a>
             )}
+
+            {user && user.role === 'ADMIN_ROLE' && (
+              <Link
+                to={`/admin?edit=${game._id}`}
+                className="w-full bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
+              >
+                <span>✏️</span>
+                <span>Editar Videojuego (Admin)</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
