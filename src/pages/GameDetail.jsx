@@ -13,6 +13,18 @@ const STATUS_CONFIG = {
 
 const ALL_STATUSES = ['Pendiente', 'Jugando', 'Completado', 'Abandonado'];
 
+const formatReleaseDate = (dateVal) => {
+  if (!dateVal) return 'Sin fecha';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return 'Sin fecha';
+  return d.toLocaleDateString('es-AR', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
 function GameDetail() {
   const { id } = useParams();
   const [game, setGame] = useState(null);
@@ -236,7 +248,7 @@ function GameDetail() {
               <div>
                 <span className="block text-gray-500 font-medium">Lanzamiento:</span>
                 <span className="text-white font-semibold">
-                  {game.releaseDate ? new Date(game.releaseDate).toLocaleDateString('es-AR') : 'Sin fecha'}
+                  {formatReleaseDate(game.releaseDate)}
                 </span>
               </div>
             </div>

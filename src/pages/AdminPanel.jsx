@@ -60,7 +60,7 @@ function AdminPanel() {
     }
 
     if (formData.releaseDate) {
-      const selectedYear = new Date(formData.releaseDate).getFullYear();
+      const selectedYear = new Date(formData.releaseDate).getUTCFullYear();
       const maxYear = new Date().getFullYear() + 10;
       if (isNaN(selectedYear) || selectedYear < 1950 || selectedYear > maxYear) {
         setError(`El año de lanzamiento debe estar comprendido entre 1950 y ${maxYear}.`);
