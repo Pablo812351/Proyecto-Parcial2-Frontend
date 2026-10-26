@@ -163,8 +163,8 @@ function GameDetail() {
   );
 
   return (
-    <div className="container mx-auto p-4 max-w-5xl mt-6 animate-fade-in">
-      <Link to="/" className="text-blue-400 hover:text-blue-300 mb-6 inline-flex items-center gap-1.5 transition">
+    <div className="container mx-auto p-4 max-w-5xl mt-3 sm:mt-6 mb-16 sm:mb-8 animate-fade-in">
+      <Link to="/" className="text-blue-400 hover:text-blue-300 mb-4 sm:mb-6 inline-flex items-center gap-1.5 transition text-sm sm:text-base">
         ← Volver al Catálogo
       </Link>
 
@@ -185,23 +185,33 @@ function GameDetail() {
       )}
 
       <div className="bg-gray-800 rounded-3xl overflow-hidden shadow-2xl border border-gray-700/60 flex flex-col md:flex-row">
-        <div className="md:w-1/2 relative min-h-[350px]">
+        <div className="w-full md:w-1/2 relative min-h-[240px] sm:min-h-[300px] md:min-h-[420px] flex items-center justify-center bg-gray-950/80 overflow-hidden">
+          {/* Fondo difuminado ambiental con los colores del propio juego */}
+          <img 
+            src={game.imageUrl || 'https://via.placeholder.com/600x400?text=Sin+Imagen'} 
+            alt="" 
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-35 scale-125 select-none pointer-events-none"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-gray-900/60 via-transparent to-transparent pointer-events-none" />
+
+          {/* Imagen principal completa, sin zoom, nítida y centrada */}
           <img 
             src={game.imageUrl || 'https://via.placeholder.com/600x400?text=Sin+Imagen'} 
             alt={game.title} 
-            className="w-full h-full object-cover"
+            className="relative z-10 w-full h-auto max-h-[320px] md:max-h-[390px] object-contain p-4 md:p-6 drop-shadow-2xl rounded-2xl transition duration-300 hover:scale-[1.02]"
           />
           <button 
             onClick={toggleFavorite}
             disabled={loadingAction}
             aria-label="Favorito"
-            className="absolute top-4 right-4 bg-gray-900/80 hover:bg-gray-900 p-3 rounded-full text-2xl transition-transform hover:scale-110 shadow-lg"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-gray-900/80 hover:bg-gray-900 p-2.5 sm:p-3 rounded-full text-xl sm:text-2xl transition-transform hover:scale-110 shadow-lg z-20"
           >
             {isFavorite ? '❤️' : '🤍'}
           </button>
         </div>
 
-        <div className="p-8 md:w-1/2 flex flex-col justify-between">
+        <div className="p-5 sm:p-7 md:p-8 md:w-1/2 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-3 mb-3">
               <span className="bg-blue-600/30 text-blue-300 border border-blue-500/40 px-3 py-1 rounded-full text-xs font-semibold">
@@ -215,10 +225,10 @@ function GameDetail() {
               )}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4">{game.title}</h1>
-            <p className="text-gray-300 leading-relaxed mb-6">{game.description}</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-3 sm:mb-4">{game.title}</h1>
+            <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-5 sm:mb-6">{game.description}</p>
 
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-400 mb-6 bg-gray-900/50 p-4 rounded-xl border border-gray-700/50">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400 mb-5 sm:mb-6 bg-gray-900/50 p-3 sm:p-4 rounded-xl border border-gray-700/50">
               <div>
                 <span className="block text-gray-500 font-medium">Desarrolladora:</span>
                 <span className="text-white font-semibold">{game.developer?.name || 'Desconocido'}</span>

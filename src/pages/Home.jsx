@@ -29,7 +29,7 @@ function Home() {
   return (
     <div className="container mx-auto p-4 animate-fade-in">
       <header className="mb-8 text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-6">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-6 pb-3 leading-normal inline-block">
           Explora el Catálogo
         </h1>
         
