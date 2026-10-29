@@ -12,7 +12,7 @@ function Home() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get(`/api/games?search=${encodeURIComponent(search.trim())}`);
+      const { data } = await api.get('/api/games?search=' + encodeURIComponent(search.trim()));
       setGames(data);
     } catch (err) {
       console.error('Error al obtener catálogo de videojuegos:', err);
@@ -84,7 +84,7 @@ function Home() {
                   <span className="text-gray-300 font-medium">{game.developer?.name || 'Desarrolladora'}</span>
                 </div>
                 <Link 
-                  to={`/games/${game._id}`}
+                  to={'/games/' + game._id}
                   className="mt-auto block w-full text-center bg-gray-700 hover:bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors"
                 >
                   Ver Detalles

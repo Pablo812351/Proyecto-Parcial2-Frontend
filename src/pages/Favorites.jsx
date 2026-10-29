@@ -16,11 +16,11 @@ function Favorites() {
 
     const fetchFavorites = async () => {
       try {
-        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const config = { headers: { Authorization: 'Bearer ' + user.token } };
         const { data } = await api.get('/api/auth/favorites', config);
         setGames(data);
       } catch (error) {
-        console.error("Error fetching favorites", error);
+        console.error('Error al obtener favoritos:', error);
       }
     };
     fetchFavorites();
@@ -54,7 +54,7 @@ function Favorites() {
               <div className="p-5 flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-2 text-white truncate">{game.title}</h2>
                 <Link 
-                  to={`/games/${game._id}`}
+                  to={'/games/' + game._id}
                   className="mt-auto block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                 >
                   Ver Detalles

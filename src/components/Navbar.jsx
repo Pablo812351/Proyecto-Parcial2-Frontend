@@ -57,7 +57,7 @@ function Navbar() {
 
                 {user.role === 'ADMIN_ROLE' && (
                   <Link to="/admin" className="text-purple-400 hover:text-purple-300 flex items-center gap-1.5 font-medium transition bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-lg">
-                    <span>⚙️</span>
+                    <span>👑</span>
                     <span>Admin</span>
                   </Link>
                 )}
@@ -122,7 +122,7 @@ function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className="px-3.5 py-2.5 rounded-xl text-purple-300 bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 font-bold flex items-center gap-2.5 transition"
                   >
-                    <span>⚙️</span>
+                    <span>👑</span>
                     <span>Panel de Administración</span>
                   </Link>
                 )}

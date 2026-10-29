@@ -45,11 +45,11 @@ function ConfirmModal({
           <button
             type="button"
             onClick={onConfirm}
-            className={`px-5 py-2.5 rounded-xl text-white font-bold text-sm transition shadow-lg flex items-center gap-2 ${
+            className={'px-5 py-2.5 rounded-xl text-white font-bold text-sm transition shadow-lg flex items-center gap-2 ' + (
               danger
                 ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/30'
                 : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
-            }`}
+            )}
           >
             {confirmText}
           </button>
